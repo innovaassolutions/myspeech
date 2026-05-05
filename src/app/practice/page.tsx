@@ -6,14 +6,14 @@ import { usePlayerStore } from '@/store/player'
 import { useAudioPlayer } from '@/hooks/useAudioPlayer'
 import { Button } from '@/components/ui/button'
 import {
-  Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, ArrowLeft
+  Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Repeat2, ArrowLeft
 } from 'lucide-react'
 
 export default function PracticePage() {
   const router = useRouter()
   const {
-    queue, currentIndex, isPlaying, isShuffled, autoplay, loopCurrent,
-    next, prev, toggleShuffle, toggleAutoplay, toggleLoopCurrent, jumpTo,
+    queue, currentIndex, isPlaying, isShuffled, autoplay, loopCurrent, loopQueue,
+    next, prev, toggleShuffle, toggleAutoplay, toggleLoopCurrent, toggleLoopQueue, jumpTo,
   } = usePlayerStore()
 
   const { currentSentence, play, pause } = useAudioPlayer()
@@ -127,9 +127,19 @@ export default function PracticePage() {
             size="icon"
             onClick={toggleLoopCurrent}
             className="h-9 w-9 rounded-full"
-            title="Loop"
+            title="Loop current sentence"
           >
             <Repeat className="w-4 h-4" />
+          </Button>
+
+          <Button
+            variant={loopQueue ? 'secondary' : 'ghost'}
+            size="icon"
+            onClick={toggleLoopQueue}
+            className="h-9 w-9 rounded-full"
+            title="Loop entire list"
+          >
+            <Repeat2 className="w-4 h-4" />
           </Button>
         </div>
 

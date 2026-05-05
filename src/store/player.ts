@@ -8,6 +8,7 @@ type PlayerStore = {
   isShuffled: boolean
   autoplay: boolean
   loopCurrent: boolean
+  loopQueue: boolean
 
   // Actions
   loadQueue: (sentences: Sentence[], startIndex?: number) => void
@@ -17,6 +18,7 @@ type PlayerStore = {
   toggleShuffle: () => void
   toggleAutoplay: () => void
   toggleLoopCurrent: () => void
+  toggleLoopQueue: () => void
   jumpTo: (index: number) => void
   clear: () => void
 }
@@ -37,6 +39,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   isShuffled: false,
   autoplay: true,
   loopCurrent: false,
+  loopQueue: false,
 
   loadQueue: (sentences, startIndex = 0) => {
     const { isShuffled } = get()
@@ -45,10 +48,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   },
 
   next: () => {
-    const { queue, currentIndex, loopCurrent } = get()
-    if (loopCurrent) return // stay on current
+    const { queue, currentIndex, loopCurrent, loopQueue } = get()
+    if (loopCurrent) return
     if (currentIndex < queue.length - 1) {
       set({ currentIndex: currentIndex + 1 })
+    } else if (loopQueue) {
+      set({ currentIndex: 0 }) // loop back to start
     } else {
       set({ isPlaying: false }) // end of queue
     }
@@ -82,6 +87,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   toggleAutoplay: () => set(s => ({ autoplay: !s.autoplay })),
   toggleLoopCurrent: () => set(s => ({ loopCurrent: !s.loopCurrent })),
+  toggleLoopQueue: () => set(s => ({ loopQueue: !s.loopQueue })),
   jumpTo: (index) => set({ currentIndex: index, isPlaying: true }),
   clear: () => set({ queue: [], currentIndex: 0, isPlaying: false }),
 }))
