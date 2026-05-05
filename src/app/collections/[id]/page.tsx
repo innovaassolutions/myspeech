@@ -224,6 +224,24 @@ export default function CollectionDetailPage() {
     idle: '',
   }[addingStatus]
 
+  async function retranslateAll() {
+    if (!sentences.length || isProcessing) return
+    setAddingStatus('translating')
+    await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sentence_ids: sentences.map(s => s.id),
+        target_language: collection?.target_language,
+      }),
+    })
+    // Reload sentences to get updated phonetic_text
+    const res = await fetch(`/api/sentences?collection_id=${id}`)
+    const updated = await res.json()
+    if (Array.isArray(updated)) setSentences(updated)
+    setAddingStatus('idle')
+  }
+
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10 text-muted-foreground">Loading...</div>
@@ -246,10 +264,25 @@ export default function CollectionDetailPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-semibold">{collection.name}</h1>
           <p className="text-base text-muted-foreground">{collection.target_language}</p>
         </div>
+        {sentences.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={retranslateAll}
+            disabled={isProcessing}
+            title="Re-translate all sentences to refresh phonetic text"
+          >
+            {addingStatus === 'translating'
+              ? <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              : <RotateCcw className="w-4 h-4 mr-2" />
+            }
+            Re-translate
+          </Button>
+        )}
       </div>
 
       {/* Add sentences */}
