@@ -29,14 +29,21 @@ export async function POST(request: NextRequest) {
   // Translate all sentences in a single Claude call for efficiency
   const sourceTexts = sentences.map(s => s.source_text).join('\n')
 
-  const message = await anthropic.messages.create({
-    model: 'claude-opus-4-6',
-    max_tokens: 4096,
-    system: `You are a professional translator. Translate each sentence into ${target_language}.
+  let message
+  try {
+    message = await anthropic.messages.create({
+      model: 'claude-opus-4-6',
+      max_tokens: 4096,
+      system: `You are a professional translator. Translate each sentence into ${target_language}.
 Output ONLY the translations, one per line, in the same order as the input.
 No numbering, no explanations, no extra text. Natural, conversational phrasing.`,
-    messages: [{ role: 'user', content: sourceTexts }],
-  })
+      messages: [{ role: 'user', content: sourceTexts }],
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Claude API error'
+    console.error('Translation error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 
   const translations = (message.content[0] as { text: string }).text
     .split('\n')
