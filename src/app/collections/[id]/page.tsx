@@ -32,7 +32,12 @@ export default function CollectionDetailPage() {
   useEffect(() => {
     Promise.all([
       fetch(`/api/collections`).then(r => r.json()),
-      fetch(`/api/sentences?collection_id=${id}`).then(r => r.json()),
+      // Fix any sentences where audio_url is set but status is wrong, then load
+      fetch('/api/sentences/fix-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collection_id: id }),
+      }).then(() => fetch(`/api/sentences?collection_id=${id}`).then(r => r.json())),
     ]).then(([cols, sents]) => {
       const col = Array.isArray(cols) ? cols.find((c: Collection) => c.id === id) : null
       setCollection(col ?? null)
