@@ -44,14 +44,17 @@ export async function POST(request: NextRequest) {
     // Generate audio via ElevenLabs
     const audioStream = await elevenlabs.textToSpeech.convert(voiceId, {
       text: sentence.target_text,
-      model_id: 'eleven_multilingual_v2',
-      output_format: 'mp3_44100_128',
+      modelId: 'eleven_multilingual_v2',
+      outputFormat: 'mp3_44100_128',
     })
 
     // Collect stream into buffer
-    const chunks: Uint8Array[] = []
-    for await (const chunk of audioStream) {
-      chunks.push(chunk)
+    const chunks: Buffer[] = []
+    const reader = (audioStream as unknown as ReadableStream<Uint8Array>).getReader()
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(Buffer.from(value))
     }
     const audioBuffer = Buffer.concat(chunks)
 
