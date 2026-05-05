@@ -227,15 +227,22 @@ export default function CollectionDetailPage() {
   async function retranslateAll() {
     if (!sentences.length || isProcessing) return
     setAddingStatus('translating')
-    await fetch('/api/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sentence_ids: sentences.map(s => s.id),
-        target_language: collection?.target_language,
-      }),
-    })
-    // Reload sentences to get updated phonetic_text
+
+    // Batch into groups of 20 to avoid Vercel function timeouts
+    const ids = sentences.map(s => s.id)
+    const BATCH = 20
+    for (let i = 0; i < ids.length; i += BATCH) {
+      await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sentence_ids: ids.slice(i, i + BATCH),
+          target_language: collection?.target_language,
+        }),
+      })
+    }
+
+    // Reload to get updated phonetic_text
     const res = await fetch(`/api/sentences?collection_id=${id}`)
     const updated = await res.json()
     if (Array.isArray(updated)) setSentences(updated)

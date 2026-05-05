@@ -15,10 +15,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing sentence_ids or target_language' }, { status: 400 })
   }
 
-  // Fetch sentences
+  // Fetch sentences (include audio_url so we don't clobber existing audio status)
   const { data: sentences, error } = await supabase
     .from('sentences')
-    .select('id, source_text')
+    .select('id, source_text, audio_url')
     .in('id', sentence_ids)
     .eq('user_id', user.id)
 
@@ -60,9 +60,11 @@ No numbering, no labels, no extra text. Natural, conversational phrasing.`,
     const block = blocks[i] ?? []
     const target_text = block[0] ?? null
     const phonetic_text = block[1] ?? null
+    // Only reset audio_status to pending if there's no audio yet
+    const extra = sentence.audio_url ? {} : { audio_status: 'pending' }
     return supabase
       .from('sentences')
-      .update({ target_text, phonetic_text, audio_status: 'pending' })
+      .update({ target_text, phonetic_text, ...extra })
       .eq('id', sentence.id)
   })
 
