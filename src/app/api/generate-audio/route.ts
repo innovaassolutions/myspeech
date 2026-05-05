@@ -48,13 +48,10 @@ export async function POST(request: NextRequest) {
       outputFormat: 'mp3_44100_128',
     })
 
-    // Collect stream into buffer
+    // Collect Node.js Readable stream into buffer
     const chunks: Buffer[] = []
-    const reader = (audioStream as unknown as ReadableStream<Uint8Array>).getReader()
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      chunks.push(Buffer.from(value))
+    for await (const chunk of audioStream as unknown as AsyncIterable<Buffer>) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
     }
     const audioBuffer = Buffer.concat(chunks)
 
