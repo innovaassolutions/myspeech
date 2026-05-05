@@ -84,9 +84,8 @@ export async function POST(request: NextRequest) {
       .update({ audio_status: 'error' })
       .eq('id', sentence_id)
 
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Audio generation failed' },
-      { status: 500 }
-    )
+    const message = err instanceof Error ? err.message : 'Audio generation failed'
+    console.error('generate-audio error:', message, err)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
