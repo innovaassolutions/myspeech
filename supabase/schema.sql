@@ -33,6 +33,7 @@ create table if not exists public.sentences (
   user_id uuid references auth.users(id) on delete cascade not null,
   source_text text not null,
   target_text text,
+  phonetic_text text,
   audio_url text,
   audio_status text default 'pending' not null
     check (audio_status in ('pending', 'generating', 'ready', 'error')),

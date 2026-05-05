@@ -46,12 +46,17 @@ export default function PracticePage() {
       {/* Main content — centred vertically */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 md:px-12 gap-10 md:gap-14">
 
-        {/* English sentence */}
-        <div className="w-full max-w-2xl text-center space-y-3">
+        {/* English sentence + phonetic */}
+        <div className="w-full max-w-2xl text-center space-y-4">
           <p className="text-3xl md:text-4xl lg:text-5xl font-medium leading-tight tracking-tight">
             {currentSentence.source_text}
           </p>
-          <p className="text-sm text-muted-foreground uppercase tracking-widest">
+          {currentSentence.phonetic_text && (
+            <p className="text-xl md:text-2xl text-muted-foreground font-light tracking-wide">
+              {currentSentence.phonetic_text}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground/60 uppercase tracking-widest">
             listening in target language
           </p>
         </div>

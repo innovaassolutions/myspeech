@@ -18,8 +18,9 @@ export type Sentence = {
   id: string
   collection_id: string
   user_id: string
-  source_text: string       // English
+  source_text: string        // English
   target_text: string | null // Mandarin (or target language)
+  phonetic_text: string | null // Pinyin, romaji, transliteration, etc.
   audio_url: string | null   // ElevenLabs generated MP3
   audio_status: 'pending' | 'generating' | 'ready' | 'error'
   created_at: string

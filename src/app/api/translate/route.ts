@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch sentences' }, { status: 500 })
   }
 
-  // Translate all sentences in a single Claude call for efficiency
+  // Translate + generate phonetic in one Claude call
   const sourceTexts = sentences.map(s => s.source_text).join('\n')
 
   let message
@@ -34,9 +34,14 @@ export async function POST(request: NextRequest) {
     message = await anthropic.messages.create({
       model: 'claude-opus-4-6',
       max_tokens: 4096,
-      system: `You are a professional translator. Translate each sentence into ${target_language}.
-Output ONLY the translations, one per line, in the same order as the input.
-No numbering, no explanations, no extra text. Natural, conversational phrasing.`,
+      system: `You are a professional translator. For each sentence translate it into ${target_language} and provide the phonetic pronunciation (e.g. Pinyin for Mandarin, Romaji for Japanese, transliteration for Arabic/Russian/Korean, IPA for others).
+
+Output exactly two lines per input sentence:
+Line 1: the translation in the target script
+Line 2: the phonetic pronunciation using Latin characters
+Then a blank line before the next sentence pair.
+
+No numbering, no labels, no extra text. Natural, conversational phrasing.`,
       messages: [{ role: 'user', content: sourceTexts }],
     })
   } catch (err) {
@@ -45,17 +50,21 @@ No numbering, no explanations, no extra text. Natural, conversational phrasing.`
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 
-  const translations = (message.content[0] as { text: string }).text
-    .split('\n')
-    .filter(line => line.trim())
+  // Parse pairs: translation\nphonetic\n\ntranslation\nphonetic...
+  const blocks = (message.content[0] as { text: string }).text
+    .split(/\n\s*\n/)
+    .map(block => block.trim().split('\n').map(l => l.trim()).filter(Boolean))
+    .filter(block => block.length >= 1)
 
-  // Update each sentence with its translation
-  const updates = sentences.map((sentence, i) =>
-    supabase
+  const updates = sentences.map((sentence, i) => {
+    const block = blocks[i] ?? []
+    const target_text = block[0] ?? null
+    const phonetic_text = block[1] ?? null
+    return supabase
       .from('sentences')
-      .update({ target_text: translations[i], audio_status: 'pending' })
+      .update({ target_text, phonetic_text, audio_status: 'pending' })
       .eq('id', sentence.id)
-  )
+  })
 
   await Promise.all(updates)
 
