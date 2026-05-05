@@ -8,17 +8,23 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const supabase = createClient()
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
+    setError('')
     setLoading(true)
-    await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
-    setSent(true)
     setLoading(false)
+    if (error) {
+      setError(error.message)
+    } else {
+      setSent(true)
+    }
   }
 
   return (
@@ -45,6 +51,7 @@ export default function LoginPage() {
               required
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Sending...' : 'Send login link'}
             </Button>
