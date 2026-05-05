@@ -9,6 +9,7 @@ type PlayerStore = {
   autoplay: boolean
   loopCurrent: boolean
   loopQueue: boolean
+  playbackRate: number
 
   // Actions
   loadQueue: (sentences: Sentence[], startIndex?: number) => void
@@ -19,6 +20,7 @@ type PlayerStore = {
   toggleAutoplay: () => void
   toggleLoopCurrent: () => void
   toggleLoopQueue: () => void
+  setPlaybackRate: (rate: number) => void
   jumpTo: (index: number) => void
   clear: () => void
 }
@@ -40,6 +42,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   autoplay: true,
   loopCurrent: false,
   loopQueue: false,
+  playbackRate: 1,
 
   loadQueue: (sentences, startIndex = 0) => {
     const { isShuffled } = get()
@@ -88,6 +91,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   toggleAutoplay: () => set(s => ({ autoplay: !s.autoplay })),
   toggleLoopCurrent: () => set(s => ({ loopCurrent: !s.loopCurrent })),
   toggleLoopQueue: () => set(s => ({ loopQueue: !s.loopQueue })),
+  setPlaybackRate: (rate) => set({ playbackRate: rate }),
   jumpTo: (index) => set({ currentIndex: index, isPlaying: true }),
   clear: () => set({ queue: [], currentIndex: 0, isPlaying: false }),
 }))

@@ -12,8 +12,8 @@ import {
 export default function PracticePage() {
   const router = useRouter()
   const {
-    queue, currentIndex, isPlaying, isShuffled, autoplay, loopCurrent, loopQueue,
-    next, prev, toggleShuffle, toggleAutoplay, toggleLoopCurrent, toggleLoopQueue, jumpTo,
+    queue, currentIndex, isPlaying, isShuffled, autoplay, loopCurrent, loopQueue, playbackRate,
+    next, prev, toggleShuffle, toggleAutoplay, toggleLoopCurrent, toggleLoopQueue, setPlaybackRate, jumpTo,
   } = usePlayerStore()
 
   const { currentSentence, play, pause } = useAudioPlayer()
@@ -104,6 +104,23 @@ export default function PracticePage() {
           >
             <SkipForward className="w-6 h-6" />
           </Button>
+        </div>
+
+        {/* Speed control */}
+        <div className="flex items-center gap-1 bg-muted rounded-full px-1 py-1">
+          {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+            <button
+              key={rate}
+              onClick={() => setPlaybackRate(rate)}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                playbackRate === rate
+                  ? 'bg-background shadow text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {rate === 1 ? '1×' : `${rate}×`}
+            </button>
+          ))}
         </div>
 
         {/* Toggle controls */}

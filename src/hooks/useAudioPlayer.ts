@@ -11,6 +11,7 @@ export function useAudioPlayer() {
     isPlaying,
     autoplay,
     loopCurrent,
+    playbackRate,
     next,
     setPlaying,
   } = usePlayerStore()
@@ -69,6 +70,12 @@ export function useAudioPlayer() {
       audioRef.current.pause()
     }
   }, [isPlaying, setPlaying])
+
+  // Apply playback rate whenever it changes
+  useEffect(() => {
+    if (!audioRef.current) return
+    audioRef.current.playbackRate = playbackRate
+  }, [playbackRate])
 
   // Media Session API — lock screen controls
   useEffect(() => {
