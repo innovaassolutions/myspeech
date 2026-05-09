@@ -56,6 +56,7 @@ export function useAudioPlayer() {
   useEffect(() => {
     if (!audioRef.current || !currentSentence?.audio_url) return
     audioRef.current.src = currentSentence.audio_url
+    audioRef.current.playbackRate = playbackRate
     if (isPlaying) {
       audioRef.current.play().catch(() => setPlaying(false))
     }
