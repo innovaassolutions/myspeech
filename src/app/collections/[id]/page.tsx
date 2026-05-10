@@ -205,6 +205,21 @@ export default function CollectionDetailPage() {
     setSelected(prev => { const n = new Set(prev); n.delete(sentenceId); return n })
   }
 
+  async function deleteSelected() {
+    if (!selected.size) return
+    if (!confirm(`Delete ${selected.size} sentence${selected.size !== 1 ? 's' : ''}?`)) return
+    const ids = [...selected]
+    await Promise.all(ids.map(id =>
+      fetch('/api/sentences', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+    ))
+    setSentences(prev => prev.filter(s => !selected.has(s.id)))
+    setSelected(new Set())
+  }
+
   function playSelected(shuffle = false) {
     const queue = selected.size > 0
       ? sentences.filter(s => selected.has(s.id) && s.audio_status === 'ready')
@@ -343,7 +358,16 @@ export default function CollectionDetailPage() {
               {selected.size === sentences.length ? 'Deselect all' : 'Select all'}
             </button>
             {selected.size > 0 && (
-              <span className="text-sm text-muted-foreground">{selected.size} selected</span>
+              <>
+                <span className="text-sm text-muted-foreground">{selected.size} selected</span>
+                <button
+                  onClick={deleteSelected}
+                  className="flex items-center gap-1.5 text-sm text-destructive hover:text-destructive/80 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              </>
             )}
             {failedCount > 0 && (
               <button
