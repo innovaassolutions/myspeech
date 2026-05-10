@@ -79,7 +79,7 @@ export default function CollectionsPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 text-muted-foreground hover:text-destructive"
+              className="absolute right-3 top-3 md:opacity-0 md:group-hover:opacity-100 transition-opacity h-7 w-7 text-muted-foreground hover:text-destructive"
               onClick={e => { e.preventDefault(); deleteCollection(collection.id) }}
             >
               <Trash2 className="w-3.5 h-3.5" />
