@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('sentences')
-    .insert(rows)
+    .upsert(rows, { onConflict: 'collection_id,source_text', ignoreDuplicates: true })
     .select()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

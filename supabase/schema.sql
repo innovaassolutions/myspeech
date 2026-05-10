@@ -74,6 +74,11 @@ end $$;
 -- ------------------------------------------------------------
 -- Indexes
 -- ------------------------------------------------------------
+alter table public.sentences
+  drop constraint if exists sentences_collection_id_source_text_key;
+alter table public.sentences
+  add constraint sentences_collection_id_source_text_key unique (collection_id, source_text);
+
 create index if not exists sentences_collection_id_idx on public.sentences(collection_id);
 create index if not exists sentences_audio_status_idx on public.sentences(audio_status);
 create index if not exists recall_results_sentence_id_idx on public.recall_results(sentence_id);
